@@ -1,13 +1,13 @@
 {
   "name": "sprint12",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Examples API on Node.js and Express.js",
+  "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js"
   },
-  "author": "",
+  "author": "Chechulnikpva Yuliya",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^7.6.0",

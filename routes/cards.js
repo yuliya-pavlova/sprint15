@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
   const reader = createReadStream(pathToProducts, { encoding: 'utf8' });
 
   reader.on('error', () => {
-    res.status('500').send({ Error: 'Ошибка чтения файла' });
+    res.status(500).send({ Error: 'Ошибка чтения файла' });
   });
 
   reader.on('open', () => {
