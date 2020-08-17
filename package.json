@@ -1,11 +1,22 @@
 {
   "name": "sprint12",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Examples API on Node.js and Express.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app.js",
+    "start": "node app.js"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Chechulnikpva Yuliya",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^2.0.4"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  }
 }
