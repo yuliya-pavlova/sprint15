@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const User = require('../models/users');
 
 module.exports.getUsers = (req, res) => {
@@ -8,9 +9,16 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  // const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      email: req.body.email,
+      password: hash, // записываем хеш в базу
+      name: req.body.name,
+      avatar: req.body.avatar,
+      about: req.body.about,
+    }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
