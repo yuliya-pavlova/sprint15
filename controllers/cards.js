@@ -28,6 +28,9 @@ module.exports.deleteCard = (req, res) => {
       res.status(404).send({ message: 'Нет такой карточки' });
     })
     .then((card) => {
+      if ((card.owner).toString() !== req.user._id) {
+        return res.status(403).send({ message: 'Нет прав на удаление карточки' });
+      }
       card.remove();
       return res.send({ card });
     })
