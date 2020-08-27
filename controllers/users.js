@@ -11,22 +11,25 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   // const { name, about, avatar, email, password } = req.body;
-
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      email: req.body.email,
-      password: hash, // записываем хеш в базу
-      name: req.body.name,
-      avatar: req.body.avatar,
-      about: req.body.about,
-    }))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+  if (req.body.password === undefined || req.body.password.length < 8) {
+    res.status(400).send({ message: 'Укажите пароль длиной не менее 8 символов' });
+  } else {
+    bcrypt.hash(req.body.password, 10)
+      .then((hash) => User.create({
+        email: req.body.email,
+        password: hash, // записываем хеш в базу
+        name: req.body.name,
+        avatar: req.body.avatar,
+        about: req.body.about,
+      }))
+      .then((user) => res.send({ data: user }))
+      .catch((err) => {
+        if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1 || err.name === 'Исключение, определенное пользователем') {
+          res.status(400).send({ message: err.message });
+        }
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
+      });
+  }
 };
 
 module.exports.getUser = (req, res) => {
