@@ -1,7 +1,7 @@
 {
   "name": "sprint14",
   "version": "1.0.0",
-  "description": "Examples API on Node.js and Express.js",
+  "description": "Examples API with authorization on Node.js and Express.js",
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
