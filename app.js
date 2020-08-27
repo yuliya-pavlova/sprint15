@@ -1,10 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const users = require('./routes/users.js');
 const { login, createUser } = require('./controllers/users.js');
 const cards = require('./routes/cards.js');
 const auth = require('./middlewares/auth.js');
+const helmet = require('helmet');
 
 const { PORT = 3000 } = process.env;
 
@@ -16,7 +18,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
+app.use(helmet());
 app.use(bodyParser());
+app.use(cookieParser());
 
 app.post('/signin', login);
 app.post('/signup', createUser);

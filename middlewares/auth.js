@@ -1,19 +1,17 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
+  const token = req.cookies.jwt;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  if (!token) {
     return res
       .status(401)
       .send({ message: 'Необходима авторизация' });
   }
-
-  const token = authorization.replace('Bearer ', '');
   let payload;
 
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, '30cc6cc609227eb7c5b6b529196fb497');
   } catch (err) {
     return res
       .status(401)
@@ -22,5 +20,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload;
 
-  next();
+  return next();
 };
