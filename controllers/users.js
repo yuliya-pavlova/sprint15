@@ -21,9 +21,16 @@ module.exports.createUser = (req, res) => {
         avatar: req.body.avatar,
         about: req.body.about,
       }))
-      .then((user) => res.send({ user }))
+      .then((user) => {
+        const {
+          email, name, about, avatar,
+        } = user;
+        res.send({
+          email, name, about, avatar,
+        });
+      })
       .catch((err) => {
-        if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1 || err.name === 'Исключение, определенное пользователем') {
+        if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1) {
           res.status(400).send({ message: err.message });
         }
         res.status(500).send({ message: 'На сервере произошла ошибка' });
