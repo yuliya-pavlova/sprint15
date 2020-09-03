@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/users');
+const BadRequestError = require('../errors/bad-request-err');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -9,9 +10,9 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   if (req.body.password === undefined || req.body.password.length < 8) {
-    res.status(400).send({ message: 'Укажите пароль длиной не менее 8 символов' });
+    throw new BadRequestError('Укажите пароль длиной не менее 8 символов');
   } else {
     bcrypt.hash(req.body.password, 10)
       .then((hash) => User.create({
@@ -33,26 +34,34 @@ module.exports.createUser = (req, res) => {
         if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1) {
           res.status(400).send({ message: err.message });
         }
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
+        next(err);
       });
   }
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
-      res.status(404).send({ message: 'Нет такого пользователя' });
+      throw new BadRequestError('Нет такого пользователя');
     })
-    .then((user) => res.send({ user }))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        res.status(404).send({ message: 'Нет такого пользователя' });
+    // .then((user) => res.send({ user }))
+    .then((user) => {
+      console.log('USER', user);
+      if (!user) {
+        throw new BadRequestError('Нет такого пользователя');
       }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
+      res.send({ user });
+    })
+    .catch((err) => {
+      // if (err instanceof mongoose.Error.CastError) {
+      //   res.status(404).send({ message: 'Нет такого пользователя' });
+      // }
+      // res.status(500).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -67,8 +76,6 @@ module.exports.login = (req, res) => {
         .end();
     })
     .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+      next(err);
     });
 };
