@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/users');
 const BadRequestError = require('../errors/bad-request-err');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ users }))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -31,9 +32,6 @@ module.exports.createUser = (req, res, next) => {
         });
       })
       .catch((err) => {
-        if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1) {
-          res.status(400).send({ message: err.message });
-        }
         next(err);
       });
   }
@@ -44,19 +42,13 @@ module.exports.getUser = (req, res, next) => {
     .orFail(() => {
       throw new BadRequestError('Нет такого пользователя');
     })
-    // .then((user) => res.send({ user }))
     .then((user) => {
-      console.log('USER', user);
       if (!user) {
         throw new BadRequestError('Нет такого пользователя');
       }
       res.send({ user });
     })
     .catch((err) => {
-      // if (err instanceof mongoose.Error.CastError) {
-      //   res.status(404).send({ message: 'Нет такого пользователя' });
-      // }
-      // res.status(500).send({ message: 'На сервере произошла ошибка' });
       next(err);
     });
 };

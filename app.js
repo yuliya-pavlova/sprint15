@@ -36,6 +36,9 @@ app.use(() => {
 });
 
 app.use((err, req, res, next) => {
+  if (err instanceof mongoose.Error.ValidationError || err.message.indexOf('duplicate key error') !== -1 || err instanceof mongoose.Error.CastError) {
+    res.status(400).send({ message: err.message });
+  }
   const { statusCode = 500, message } = err;
 
   res

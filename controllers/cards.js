@@ -1,43 +1,40 @@
-const mongoose = require('mongoose');
 const Card = require('../models/card');
+const ForbiddenError = require('../errors/forbidden-err');
+const BadRequestError = require('../errors/bad-request-err');
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
     .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.send({ cards }))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      next(err);
+    });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.id)
     .orFail(() => {
-      res.status(404).send({ message: 'Нет такой карточки' });
+      throw new BadRequestError('Нет такой карточки');
     })
     .then((card) => {
       if ((card.owner).toString() !== req.user._id) {
-        return res.status(403).send({ message: 'Нет прав на удаление карточки' });
+        throw new ForbiddenError('Нет прав на удаление карточки');
       }
       card.remove();
       return res.send({ card });
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: 'Нет такой карточки' });
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
