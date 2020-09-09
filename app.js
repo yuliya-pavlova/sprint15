@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -36,15 +37,20 @@ app.use(bodyParser());
 app.use(cookieParser());
 app.use(requestLogger);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
-}), celebrate({
-  headers: Joi.object({
-    'Content-Type': Joi.string().required(),
-  }),
+  headers: Joi.object().keys({
+    'Content-Type': 'application/json',
+  }).unknown(true),
 }), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -54,6 +60,9 @@ app.post('/signup', celebrate({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
+  headers: Joi.object().keys({
+    'Content-Type': 'application/json',
+  }).unknown(true),
 }), createUser);
 
 app.use(auth);

@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const AuthError = require('../errors/auth-err');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
 
@@ -10,9 +12,9 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, '30cc6cc609227eb7c5b6b529196fb497');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    next(err);
+    next(new AuthError('Необходима авторизация'));
   }
 
   req.user = payload;
